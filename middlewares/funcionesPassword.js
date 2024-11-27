@@ -12,20 +12,26 @@ function encriptarPass(password) {
     
 };
 
-function validarPassword(password, hash, salt){
+function validarPassword(password, salt, hash){
     const hashValidar = crypto.scryptSync(password,salt,100000,64,"sha512").toString("hex");
-    return hashValidar==hash;
+    return hashValidar == hash;
 };
 
-function usuarioAutorizado(){
+function usuarioAutorizado(req, res, cb){
     var autorizado = false;
-
+    if (req.session.usuario){
+        console.log("Usuario autorizado");
+        autorizado = true;
+    }
     return autorizado;
 };
 
 function adminAutorizado(){
     var autorizado= false;
-
+    if (req.session.admin){
+        console.log("Admin autorizado");
+        autorizado = true;
+    }
     return autorizado;
 };
 
@@ -35,5 +41,3 @@ module.exports={
     usuarioAutorizado,
     adminAutorizado
 }
-
-//encriptarPass("holaa");

@@ -5,7 +5,7 @@ class Usuario {
         this.nombre = data.nombre;
         this.usuario = data.usuario;
         this.password = data.password;
-        this.salt = data.password;
+        this.salt = data.salt;
         this.tipoUsuario = data.tipoUsuario;
     }
     set id(id) {

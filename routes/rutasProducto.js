@@ -14,13 +14,22 @@ rutas.get("/productos/buscarPorId/:id", async(req,res)=>{
 
 rutas.get("/productos/buscarPorNombre/:nombre", async (req, res) => {
    const { nombre } = req.params;
-   const producto = await buscarPorNombre(nombre);
-   if (producto) {
-       res.json(producto);
-   } else {
-       res.status(404).json({ mensaje: "Producto no encontrado" });
+   
+   try {
+       const productos = await buscarPorNombre(nombre);
+     
+       if (productos && productos.length > 0) {
+           res.json(productos);
+       } else {
+           console.log("Mensaje en error 404: ", productos);
+           res.status(404).json({ mensaje: "No se encontraron productos" });
+       }
+   } catch (error) {
+       console.error("Error al buscar productos:", error);
+       res.status(500).json({ mensaje: "Error en el servidor" });
    }
 });
+
 
 rutas.delete("/productos/borrarProducto/:id", async(req,res)=>{
    var productoBorrado=await borrarProducto (req.params.id);

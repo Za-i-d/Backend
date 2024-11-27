@@ -32,10 +32,17 @@ async function buscarPorIdP(id) {
 };
 
 async function buscarPorNombre(nombre) {
-    const productos = await productosBD.get(); // Obtener todos los productos
-    const productoEncontrado = productos.docs.find(doc => doc.data().nombre === nombre);
-    return productoEncontrado ? { id: productoEncontrado.id, ...productoEncontrado.data() } : null;
+    
+    const productos = await productosBD.get();
+    // Filtra productos que contienen el texto ingresado en cualquier parte del nombre (insensible a mayúsculas)
+    const productosEncontrados = productos.docs
+        .filter(doc => doc.data().nombre.toLowerCase().includes(nombre.toLowerCase()))
+        .map(doc => ({ id: doc.id, ...doc.data() })); // Obtiene una lista de productos con coincidencias
+
+
+    return productosEncontrados;
 }
+
 
 async function nuevoProducto(data) {
     const producto1=new Producto(data);

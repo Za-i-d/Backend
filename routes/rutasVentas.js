@@ -31,18 +31,16 @@ rutas.put("/ventas/cambiarEstatus/:id", async(req,res)=>{
 });
 
 rutas.put("/ventas/editarVenta/:id", async (req, res) => {
-   const { id } = req.params; // ID de la venta que se está editando
-   console.log(req.params); // Muestra los parámetros en la consola
+    const { id } = req.params; // ID de la venta que se está editando
+    const { cantidad, id_prod, id_usu } = req.body; // Extrae todos los datos del cuerpo
+    console.log("Datos recibidos:", { cantidad, id_prod, id_usu });
 
-   const { cantidad, nombre, id_prod } = req.body; // Extrae cantidad, nombre e id_prod del cuerpo de la solicitud
-   console.log("Datos recibidos:", { cantidad, nombre, id_prod }); // Agrega un log para verificar los datos recibidos
+    const ventaEditado = await editarVenta(id, { cantidad, id_prod, id_usu });
 
-   const ventaEditado = await editarVenta(id, { cantidad, nombre, id_prod }); // Pasa el id_prod al editarVenta
-
-   res.json({
-       success: ventaEditado,
-       message: ventaEditado ? "Venta actualizada correctamente" : "Error al actualizar la venta"
-   });
+    res.json({
+        success: ventaEditado,
+        message: ventaEditado ? "Venta actualizada correctamente" : "Error al actualizar la venta"
+    });
 });
 
 

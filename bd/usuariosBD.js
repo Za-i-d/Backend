@@ -22,7 +22,7 @@ async function mostrarUsuarios() {
             usuariosValidos.push(usuario1.getUsuario);
         }
     });
-    //console.log(usuariosValidos);
+    // console.log(usuariosValidos);
     return usuariosValidos;
 }
 //mostrarUsuarios();
@@ -40,9 +40,15 @@ async function buscarPorId(id) {
 
 async function buscarPorNombre(nombre) {
     const usuarios = await usuariosBD.get(); // Obtener todos los usuarios
-    const usuarioEncontrado = usuarios.docs.find(doc => doc.data().nombre === nombre);
-    return usuarioEncontrado ? { id: usuarioEncontrado.id, ...usuarioEncontrado.data() } : null;
+
+    // Filtrar usuarios cuyo nombre contiene la cadena proporcionada (búsqueda parcial)
+    const usuariosEncontrados = usuarios.docs
+        .filter(doc => doc.data().nombre.toLowerCase().includes(nombre.toLowerCase()))
+        .map(doc => ({ id: doc.id, ...doc.data() })); // Formato adecuado para cada usuario encontrado
+
+    return usuariosEncontrados;
 }
+
 
 async function editUsu(id, nuevosDatos) {
     var usuarioValido = await buscarPorId(id);
@@ -84,11 +90,61 @@ async function borrarUsuario(id) {
     return usuarioBorrado;
 }
 
+async function login(req, usuario, password) {
+    //usuariosBD.doc es cuando queremos consultar por id
+    var data = {};
+    const usuarioEncontrado = await usuariosBD.where("usuario","==",usuario).get();
+    var user = {
+        usuario : "anonimo",
+        tipo : "sin tipo de usuario"
+    }
+    if (usuarioEncontrado.size > 0) {
+        usuarioEncontrado.forEach(usu => {
+            const passwordValido = validarPassword(password, usu.data().salt, usu.data().password);
+            if (passwordValido) {
+                user.usuario = usu.data().usuario;
+                if (usu.data().tipoUsuario == "usuario") {
+                    req.session.usuario = user.usuario;
+                    user.tipo = "usuario";
+                    console.log("Inicio sesion un usuario");
+                    
+                } else if (usu.data().tipoUsuario == "admin") {
+                    req.session.admin = user.usuario;
+                    user.tipo = "admin";
+                    console.log("Inicio sesion un administrador");
+                    
+                }
+            }
+        })
+    }
+    return user;
+}
+
+function getSessionUsuario(req) {
+    var activo = false;
+    if (req.session.usuario != undefined || req.session.admin != undefined) {
+        activo = true;
+    }
+    return activo;
+}
+
+function getSessionAdmin(req) {
+    var activo = false;
+    if (req.session.admin != undefined) {
+        activo = true;
+    }
+    return activo;
+}
+
+
 module.exports={
     mostrarUsuarios,
     nuevoUsu,
     borrarUsuario,
     buscarPorId,
     buscarPorNombre,
-    editUsu
+    editUsu,
+    login,
+    getSessionUsuario,
+    getSessionAdmin
 }

@@ -1,7 +1,7 @@
 const ventasBD = require("./conexion").ventas;
 const Venta = require("../clases/VentasClase");
 const { ventas } = require("./conexion");
-const { buscarPorId } = require('./usuariosBD');
+const { buscarPorId, editUsu } = require('./usuariosBD');
 const { buscarPorIdP, editProd } = require('./productosBD');
 
 //const{encriptarPass, validarPassword,usuarioAutorizado,adminAutorizado}=require("../middlewares/funcionesPassword")
@@ -118,21 +118,19 @@ async function editarVenta(id, nuevosDatos) {
     const ventaValida = await buscarPorIdV(id);
     let ventaEditada = false;
     if (ventaValida) {
-        const { cantidad, nombre, id_prod } = nuevosDatos; // Asegúrate de que id_prod se obtiene correctamente
-        const productoEditado = await editProd(id_prod, { nombre });
-        if (productoEditado) {
-            try {
-                await ventasBD.doc(id).update({ cantidad });
-                ventaEditada = true;
-            } catch (error) {
-                console.error("Error al editar la cantidad en la venta:", error);
-            }
+        const { cantidad, id_prod, id_usu } = nuevosDatos;
+        
+        try {
+            // Actualiza la cantidad en la venta
+            await ventasBD.doc(id).update({ cantidad, id_prod, id_usu });
+            ventaEditada = true;
+        } catch (error) {
+            console.error("Error al editar la cantidad en la venta:", error);
         }
+
     }
     return ventaEditada;
 }
-
-
 
 
 async function cambiarEstatus(id, nuevoEstatus) {
